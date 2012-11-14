@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my @filenames = @ARGV;
+if ( not $ARGV[0] ) { print "You forgot the filename\n"; exit(); }
+
+foreach my $filename ( @filenames )
+{
+    print "filename: $filename\n";
+    open(FILE, $filename) or die "Can't open file: $filename\n";
+    my $counter = 0;
+    while(<FILE>)
+    {
+        $counter++;
+    }
+    close(FILE);
+
+    print "$filename: $counter\n";
+}
+
+
