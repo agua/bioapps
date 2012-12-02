@@ -1,18 +1,13 @@
 #!/usr/bin/perl -w
-
 #### DEBUG
 my $DEBUG = 0;
 #$DEBUG = 1;
-
 #### TIME
 my $time = time();
 my $duration = 0;
 my $current_time = $time;
-
 =head2
-
     APPLICATION     createIntervals
-
     PURPOSE
   
 		Generate an interval file conforming to the GATK RealignerTargetCreator
@@ -20,13 +15,11 @@ my $current_time = $time;
 		output file, suitable for input into the GATK IndelRealigner
 	
 	VERSION		0.01
-
 	HISTORY
 	
 		0.01 BASIC INTERVAL CALCULATION WITH WINDOW
 		
     INPUTS
-
         1. SORTED (BY CHROMOSOMAL POSITION) *snp FILE
         
         2. OUTPUT FILE LOCATION
@@ -52,18 +45,13 @@ my $current_time = $time;
     --window	:   Include <window> bases to left and right of SNP/indel
 					(Default: 5)
     --help      :   Print help info
-
     EXAMPLES
-
 perl /nethome/bioinfo/apps/agua/0.5/bin/apps/snp/createIntervals.pl \
 --inputfile /scratch/syoung/base/pipeline/SRA/NA18507/SRP000239/sampled/200bp/chr22/maq/2/chr22/hit.bam \
 --outputfile /scratch/syoung/base/pipeline/SRA/NA18507/SRP000239/sampled/200bp/chr22/maq/2/chr22/hit.bam.range
 
-
 =cut
-
 use strict;
-
 #### EXTERNAL MODULES
 use Term::ANSIColor qw(:constants);
 use Data::Dumper;
@@ -71,27 +59,21 @@ use Getopt::Long;
 use FindBin qw($Bin);
 use File::Path;
 use File::Copy;
-
 #### USE LIBRARY
 use lib "$Bin/../../../lib";	
 use lib "$Bin/../../../lib/external";	
-
 #### INTERNAL MODULES
 use SNP;
 use Timer;
 use Util;
 use Conf::Agua;
-
 ##### STORE ARGUMENTS TO PRINT TO FILE LATER
 my @arguments = @ARGV;
-
 #### FLUSH BUFFER
 $| =1;
-
 #### GET CONF 
 my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
 my $samtools = $conf->getKey("applications:aquarius-8", 'SAMTOOLS');
-
 #### GET OPTIONS
 # SPECIFIC
 my $inputfile;
@@ -99,7 +81,6 @@ my $outputfile;
 my $window = 5;
 my $help;
 if ( not GetOptions (
-
 	#### GENERAL
     'inputfile=s'	=> \$inputfile,
     'outputfile=s'	=> \$outputfile,
@@ -109,28 +90,22 @@ if ( not GetOptions (
 	
 ) )
 { print "Use option --help for usage instructions.\n";  exit;    };
-
 #### PRINT HELP
 if ( defined $help )	{	usage();	}
-
 #### CHECK INPUTS
 die "inputfile not defined (option --help for usage)\n" if not defined $inputfile;
 die "outputfile not defined (Use --help for usage)\n" if not defined $outputfile;
-
 #### DEBUG
 print "createIntervals.pl    inputfile: $inputfile\n";
 print "createIntervals.pl    outputfile: $outputfile\n";
-
 #### RETRIEVE COMMAND
 my $command = "$0 @arguments";
-
 #### INSTANTIATE 
 my $snp = SNP->new();
 	
 #### GET HIT RANGE
 print "createIntervals.pl    Doing createIntervals()\n";
 $snp->createIntervals($inputfile, $outputfile, $window);
-
 #### PRINT RUN TIME
 my $runtime = Timer::runtime( $time, time() );
 print "createIntervals.pl    Run time: $runtime\n";
@@ -140,11 +115,9 @@ print Timer::datetime(), "\n";
 print "createIntervals.pl    ****************************************\n\n\n";
 exit;
 
-
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #									SUBROUTINES
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 
 sub usage
 {
@@ -153,5 +126,4 @@ sub usage
 	print RESET;
 	exit;
 }
-
 

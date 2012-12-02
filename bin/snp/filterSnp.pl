@@ -1,14 +1,10 @@
 #!/usr/bin/perl -w
-
 #### DEBUG
 my $DEBUG = 0;
 $DEBUG = 1;
-
 #### TIME
 my $time = time();
-
 =head2
-
     APPLICATION     filterSnp
 	    
     PURPOSE
@@ -16,11 +12,9 @@ my $time = time();
         1. FILTER A LIST OF SNPS BASED ON USER-DEFINED CRITERIA
         
         2. OUTPUT THE NUMBER OF SNPS PASSING EACH SUCCESSIVE FILTER
-
         3. GENERATE A SET OF DATABASE TABLES, ONE FOR EACH FILTER LEVEL
             
         4. FILTERS:
-
 			1. species
 			2. chromosome
 			3. variant
@@ -30,7 +24,6 @@ my $time = time();
 			7. dbsnp
   
     INPUT
-
         1. INPUT FILE
         
         2. FASTA OR FASTQ INPUT FILES
@@ -44,7 +37,6 @@ my $time = time();
     USAGE
     
 ./filterSnp.pl <--inputfile String> <--filetype String> <--depth String> <--species String> <--lines Integer> [--sense] [--dbsnp] [--help]    
-
     --inputfile				:   Full path to input SNP file
 	--filetype				: 	Type of SNP file '454', 'casava', 'maq' (DEFAULT: 454)
     --species				:   'human' or 'mouse'
@@ -56,16 +48,9 @@ my $time = time();
 	--sense					:   'sense' or 'missense': Return only synonymous or missense SNPs
     --help                 	:   print help info
 
-
-
-
-
 COMPLETE JSON ARGUMENTS:
-
-{"username":"admin","sessionId":"9999999999.9999.999","project":"Project1","workflow":"Workflow1","report":"Report1","mode":"filterReport","class":"Report::SNP","editor":false,"reportCombo":"Report1","workflowCombo":"Workflow1","projectCombo":"Project1","chromosomeCombo":"chr1","speciesCombo":"Human","senseCombo":"Missense","exonicCombo":"Exonic","dbsnpCombo":"Only dbsnp","chromosomeCheckbox":true,"senseCheckbox":false,"exonicCheckbox":false,"dbsnpCheckbox":false,"depthCheckbox":true,"variantCheckbox":true,"fileInput":"Project1/Workflow1/454HCDiffs-headers-SNP.txt","variantInput":"47%","depthSpinner":"10.00","totalResult":"-","chromosomeResult":"-","variantResult":"-","depthResult":"-","senseResult":"-","exonicResult":"-","dbsnpResult":"-"}
-
+{"username":"admin","sessionId":"1234567890.1234.123","project":"Project1","workflow":"Workflow1","report":"Report1","mode":"filterReport","class":"Report::SNP","editor":false,"reportCombo":"Report1","workflowCombo":"Workflow1","projectCombo":"Project1","chromosomeCombo":"chr1","speciesCombo":"Human","senseCombo":"Missense","exonicCombo":"Exonic","dbsnpCombo":"Only dbsnp","chromosomeCheckbox":true,"senseCheckbox":false,"exonicCheckbox":false,"dbsnpCheckbox":false,"depthCheckbox":true,"variantCheckbox":true,"fileInput":"Project1/Workflow1/454HCDiffs-headers-SNP.txt","variantInput":"47%","depthSpinner":"10.00","totalResult":"-","chromosomeResult":"-","variantResult":"-","depthResult":"-","senseResult":"-","exonicResult":"-","dbsnpResult":"-"}
 REDUCED TO COMMAND LINE ARGUMENTS:
-
 --inputfile Project1/Workflow1/454HCDiffs-headers-SNP.txt \
 --chromosomeCombo chr1 \
 --speciesCombo Human \
@@ -81,13 +66,8 @@ REDUCED TO COMMAND LINE ARGUMENTS:
 --variantInput 47% \
 --depthSpinner 10.00 \
 --editor \:false
-
 WHICH WILL BE PARSED FROM THE FOLLOWING:
-
-
-
     EXAMPLES
-
 perl /nethome/bioinfo/apps/agua/0.4/bin/apps/filterSnp.pl \
 --inputfile /nethome/syoung/.agua/Project1/Workflow1/454HCDiffs-headers-SNP.txt \
 --species human \
@@ -96,10 +76,7 @@ perl /nethome/bioinfo/apps/agua/0.4/bin/apps/filterSnp.pl \
 --exonic exonic \
 --variant 0.47 \
 --depth 10
-
-
 	NOTES
-
 		PRINT JUST THE TABLE HEADERS AND THEN AN ARRAY OF
 		LINES TO REDUCE TRANSPORT:
 		   outputResult : {
@@ -122,63 +99,45 @@ perl /nethome/bioinfo/apps/agua/0.4/bin/apps/filterSnp.pl \
 			   items : [ array of hashes ]
 		   }
 		   
-
 		454HCDiffs.txt FORMAT:
 		
 			name    chromosome      ccdsstart       ccdsstop        referencenucleotide     variantnucleotide       depth   variantfrequency        chromosomestart chromosomestop  sense   referencecodon    variantcodon    referenceaa     variantaa       strand  snp     score   strand
 			CCDS3.1 chr1    770     770     C       T       3       100%    881093  881093  missense        GCC     GTC     Alanine Valine  -                       -
 			CCDS3.1 chr1    780     780     G       A       3       100%    879243  879243  synonymous      CTG     CTA     Leucine Leucine -                       -
 			CCDS3.1 chr1    790     790     C       G       3       100%    879233  879233  missense        CTG     GTG     Leucine Valine  -                       -
-
 =cut
-
 print "filterSnp.pl    id:\n" if $DEBUG;
 print `id` if $DEBUG;
 print "filterSnp.pl    whoami:\n" if $DEBUG;
 print `whoami` if $DEBUG;
-
 use strict;
-
 #### EXTERNAL MODULES
 use Term::ANSIColor qw(:constants);
 use Data::Dumper;
 use Getopt::Long;
 use FindBin qw($Bin);
-
 #### USE LIBRARY
 use lib "$Bin/../../../lib";	
-
 #### INTERNAL MODULES
 use Report::SNP;
 use Timer;
 use Util;
 use Conf::Agua;
-
 ##### STORE ARGUMENTS TO PRINT TO FILE LATER
 my @arguments = @ARGV;
 #print "filterSnp.pl    Arguments: @arguments\n";
-
 #### FLUSH BUFFER
 $| =1;
-
 #### SET filterSnp LOCATION
 my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
-
-
-
 ############# 	CHECK THIS!!!!
-
 my $filterSnp = $conf->getKey("agua", 'filterSnp');
-
-
 my $qstat = $conf->getKey("cluster", 'QSTAT');
 my $qsub = $conf->getKey("cluster", 'QSUB'); #### /usr/local/bin/qsub
 my ($filterSnpbin) = $filterSnp =~ /^(.+)\/[^\/]+$/;
 #print "filterSnp.pl    filterSnpbin: $filterSnpbin\n";
-
 #### DEFAULT MAX FILE LINES (MULTIPLE OF 4 BECAUSE EACH FASTQ RECORD IS 4 LINES)
 my $maxlines = 4000000;
-
 ##### GET OPTIONS
 my $inputfile;
 my $species;
@@ -188,7 +147,6 @@ my $depth;
 my $sense;
 my $exonic;
 my $dbsnp;
-
 my $help;
 if ( not GetOptions (
     'inputfile=s' => \$inputfile,
@@ -201,25 +159,19 @@ if ( not GetOptions (
     'help' => \$help
 ) )
 { print "filterSnp.pl    Use option --help for usage instructions.\n";  exit;    };
-
 #### PRINT HELP
 if ( defined $help )	{	usage();	}
-
 #### CHECK INPUTS
 print "input file 1 not defined (Use --help for usage)\n" if not defined $inputfile;
 print "depth directory not defined (Use --help for usage)\n" if not defined $depth;
 print "species not defined (Use --help for usage)\n" if not defined $species;
-
 print "filterSnp.pl    inputfile: $inputfile\n";
 print "filterSnp.pl    depth: $depth\n";
-
 #### CHECK INPUTS
 print "filterSnp.pl    input file not defined (option --inputfile)\n" if not defined $inputfile;
 print "filterSnp.pl    Output directory not defined (option d)\n" if not defined $depth;
 print "filterSnp.pl    Reference file not defined (option r)\n" if not defined $species;
-
-#{"username":"admin","sessionId":"9999999999.9999.999","project":"Project1","workflow":"Workflow1","report":"Report1","mode":"filterReport","class":"Report::SNP","editor":false,"reportCombo":"Report1","workflowCombo":"Workflow1","projectCombo":"Project1","chromosomeCombo":"chr1","speciesCombo":"Human","senseCombo":"Missense","exonicCombo":"Exonic","dbsnpCombo":"Only dbSNP","chromosomeCheckbox":true,"senseCheckbox":false,"exonicCheckbox":false,"dbsnpCheckbox":false,"depthCheckbox":true,"variantCheckbox":true,"fileInput":"Project1/Workflow1/454HCDiffs-headers-SNP.txt","variantInput":"47%","depthSpinner":"10.00","totalResult":"-","chromosomeResult":"-","variantResult":"-","depthResult":"-","senseResult":"-","exonicResult":"-","dbsnpResult":"-"}
-
+#{"username":"admin","sessionId":"1234567890.1234.123","project":"Project1","workflow":"Workflow1","report":"Report1","mode":"filterReport","class":"Report::SNP","editor":false,"reportCombo":"Report1","workflowCombo":"Workflow1","projectCombo":"Project1","chromosomeCombo":"chr1","speciesCombo":"Human","senseCombo":"Missense","exonicCombo":"Exonic","dbsnpCombo":"Only dbSNP","chromosomeCheckbox":true,"senseCheckbox":false,"exonicCheckbox":false,"dbsnpCheckbox":false,"depthCheckbox":true,"variantCheckbox":true,"fileInput":"Project1/Workflow1/454HCDiffs-headers-SNP.txt","variantInput":"47%","depthSpinner":"10.00","totalResult":"-","chromosomeResult":"-","variantResult":"-","depthResult":"-","senseResult":"-","exonicResult":"-","dbsnpResult":"-"}
 my $mappings = {
 	inputfile => "fileInput",
 	chromosome => "chromosomeCombo",
@@ -232,7 +184,6 @@ my $mappings = {
 	depth => "depthSpinner 10.00",
 	editor => "editor"
 };
-
 #### CONVERT ARGUMENTS TO HASH
 my $arguments = {};
 mapInput($arguments, $mappings, $sense, "sense");
@@ -240,14 +191,10 @@ mapInput($arguments, $mappings, $exonic, "exonic");
 mapInput($arguments, $mappings, $dbsnp, "dbsnp");
 mapInput($arguments, $mappings, $depth, "depth");
 mapInput($arguments, $mappings, $variant, "variant");
-
-
 $arguments->{exonicCheckbox} = 1 if defined $arguments->{exonic};
 $arguments->{dbsnpCheckbox} = 1 if defined $arguments->{dbsnp};
 $arguments->{depthCheckbox} = 1 if defined $arguments->{depth};
 $arguments->{variantCheckbox} = 1 if defined $arguments->{variant};
-
-
 my $report = Report::SNP->new(
 	{
 		inputfile 	=> $inputfile,
@@ -267,8 +214,6 @@ my $report = Report::SNP->new(
 );
 	
 print $runfilterSnp->snpcall();
-
-
 #### PRINT RUN TIME
 my $runtime = Timer::runtime( $time, time() );
 print "filterSnp.pl    Run time: $runtime\n";
@@ -277,13 +222,10 @@ print "filterSnp.pl    ";
 print Timer::datetime(), "\n";
 print "filterSnp.pl    ****************************************\n\n\n";
 exit;
-
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #									SUBROUTINES
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 =head2
-
 	SUBROUTINE 		mapInput
 	
 	PURPOSE
@@ -291,7 +233,6 @@ exit;
 		MAP THE COMMAND LINE INPUTS TO THE filterReport JSON INPUTS
 		
 =cut
-
 sub mapInput
 {
 	my $arguments		=	shift;
@@ -304,8 +245,6 @@ sub mapInput
 	$arguments->{$checkbox} = 1 if defined $value;
 	$arguments->{$checkbox} = 0 if not defined $value;	
 }
-
-
 sub usage
 {
 	print GREEN;
@@ -313,5 +252,3 @@ sub usage
 	print RESET;
 	exit;
 }
-
-

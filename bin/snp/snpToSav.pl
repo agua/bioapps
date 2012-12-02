@@ -1,10 +1,7 @@
 #!/usr/bin/perl -w
-
 my $DEBUG = 0;
 $DEBUG = 1;
-
 =head2
-
     TEST        snpToSav
     
     PURPOSE
@@ -39,11 +36,9 @@ $DEBUG = 1;
         1. PILEUP FORMAT SNP FILE
         
         2. SQLITE DATABASE FILE CONTAINING THESE TABLES:
-
             ccdsGene - exonStarts, exonStops
             ccdsSeq - sequence
             snp130_chr* - SNP positions
-
 	
 	NOTES
 	
@@ -110,7 +105,6 @@ $DEBUG = 1;
 			'$'     end of a read segment.
 			
 		Start and end markers of a read are largely inspired by Phil Green's CALF format. These markers make it possible to reconstruct the read sequences from pileup.
-
 	EXAMPLES
 	
 ./snpToSav.pl \
@@ -118,25 +112,19 @@ $DEBUG = 1;
 --inputfile /scratch/syoung/base/pipeline/SRA/NA18507/maq/maq1/chr22/out.filter \
 --outputfile /scratch/syoung/base/pipeline/SRA/NA18507/maq/maq1/chr22/out.filter.snp
 
-
 =cut
-
 use strict;
-
 #### USE FINDBIN
 use FindBin qw($Bin);
-
 #### USE LIBS
 use lib "$Bin/../../../lib";
 use lib "$Bin/../../../lib/external";
 use lib "$Bin/../../../lib/external/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi";
-
 BEGIN {    
 #    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/site_perl/5.8.8";
     unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-64/site_perl/5.8.8/x86_64-linux-thread-multi";
 #    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/5.8.8";   
 }
-
 
 #### INTERNAL MODULES
 use Filter::SNP;
@@ -144,7 +132,6 @@ use DBaseFactory;
 use Feature;
 use Util;
 use Conf::Agua;
-
 #### EXTERNAL MODULES
 use Term::ANSIColor qw(:constants);
 use Data::Dumper;
@@ -152,11 +139,9 @@ use Getopt::Long;
 use File::Path;
 use File::Copy;
 use File::Remove;
-
 ##### STORE ARGUMENTS TO PRINT TO FILE LATER
 my @arguments = @ARGV;
 #print "snpToSav.pl    arguments: @arguments\n";
-
 #### GET OPTIONS
 my $stdout;
 my $inputfile;
@@ -179,32 +164,26 @@ if ( not GetOptions (
     'help'          => \$help
 ) )
 { print "Use option --help for usage instructions.\n";  exit;    };
-
 #### PRINT HELP
 if ( defined $help )	{	usage();	}
-
 #### CHECK INPUTS
 die "inputfile not defined (option --help for usage)\n" if not defined $inputfile;
 die "outputfile not defined (Use --help for usage)\n" if not defined $outputfile;
 die "inputtype not defined (Use --help for usage)\n" if not defined $inputtype;
 die "dbfile not defined (Use --help for usage)\n" if not defined $dbfile;
-
 #### PRINT TO STDOUT IF DEFINED stdout
 print "Printing STDOUT to file:\n\n$stdout\n\n" if defined $stdout;
 open(STDOUT, ">$stdout") or die "Can't redirect STDOUT to file: $stdout\n" if defined $stdout;
 open(STDERR, ">>$stdout") or die "Can't redirect STDERR to file: $stdout\n" if defined $stdout;
-
 #### DEBUG
 print "snpToSav.pl    inputfile: $inputfile\n";
 print "snpToSav.pl    outputfile: $outputfile\n";
 print "snpToSav.pl    inputtype: $inputtype\n";
 print "snpToSav.pl    dbfile: $dbfile\n";
-
 #### INITIALISE DATABASE HANDLE
 my $dbtype = "SQLite";
 my $testdir = "$Bin/../t/04-Filter-SNP";
 $dbfile = "$testdir/dbfile/filtersnp.dbl" if not defined $dbfile;
-
 #### COPY SQLITE DB FILE TO OUTPUT DIR
 my ($outputdir) = $outputfile =~  /^(.+?)\/[^\/]+$/;
 print "snpToSav.pl    Copying sqlite dbfile\n";
@@ -214,7 +193,6 @@ File::Copy::copy($dbfile, $tempfile) or die "Can't copy dbfile:\n\n$dbfile\n\n t
     if defined $tempfile and not -f $tempfile;
 $dbfile = $tempfile if defined $tempfile;
 print "snpToSav.pl    Copy completed\n";
-
 my $database = "filtersnp";
 my $db = 	DBaseFactory->new( $dbtype,
 	{
@@ -226,16 +204,13 @@ print "snpToSav.pl    db:\n" if $DEBUG;
 print Dumper $db if $DEBUG;
 print "\n" if $DEBUG;
 
-
 #### SET DBDIR CONTAINING <DBSNP>-chr*.dbl DB FILES
 $dbdir = "$testdir/dbfile" if not defined $dbdir;
-
 #### GET NUMBER OF LINES IN *snp FILE
 my $linecount = 0;
 open(FILE, $inputfile) or die "Can't open file: $inputfile\n";
 while(<FILE>)   {   $linecount++; }
 close(FILE);
-
 #### INITIALISE Filter::SNP OBJECT 
 my $filterSNP = Filter::SNP->new( { 'DBOBJECT' => $db } );
 $filterSNP->annotate(
@@ -249,9 +224,7 @@ $filterSNP->annotate(
 		linecount	=>	$linecount
     }
 );
-
 #### DELETE SQLITE DB FILE
 my $recursive = 0;
 File::Remove::remove(\$recursive, $dbfile) if -f $dbfile;
-
 

@@ -144,7 +144,8 @@ $| =1;
 my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
 my $samtools = $conf->getKey("applications:aquarius-8", 'SAMTOOLS');
 my $gatk = $conf->getKey("applications:aquarius-8", 'GATK');
-my $java = $conf->getKey("applications:aquarius-8", 'JAVA');
+my $javahome = $conf->getKey("agua", 'JAVA');
+my $java = "$javahome/java";
 my $cluster = $conf->getKey("agua", 'CLUSTERTYPE');
 my $qstat = $conf->getKey("cluster", 'QSTAT');
 my $qsub = $conf->getKey("cluster", 'QSUB'); #### /usr/local/bin/qsub

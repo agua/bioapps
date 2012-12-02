@@ -1,10 +1,8 @@
 #!/usr/bin/perl -w
-
 my $DEBUG = 0;
 $DEBUG = 1;
 
 =head2
-
     TEST        snpToSav
     
     PURPOSE
@@ -39,11 +37,9 @@ $DEBUG = 1;
         1. PILEUP FORMAT SNP FILE
         
         2. SQLITE DATABASE FILE CONTAINING THESE TABLES:
-
             ccdsGene - exonStarts, exonStops
             ccdsSeq - sequence
             snp130_chr* - SNP positions
-
 	
 	NOTES
 	
@@ -110,7 +106,6 @@ $DEBUG = 1;
 			'$'     end of a read segment.
 			
 		Start and end markers of a read are largely inspired by Phil Green's CALF format. These markers make it possible to reconstruct the read sequences from pileup.
-
 	EXAMPLES
 	
 ./snpToSav.pl \
@@ -118,9 +113,7 @@ $DEBUG = 1;
 --inputfile /scratch/syoung/base/pipeline/SRA/NA18507/maq/maq1/chr22/out.filter \
 --outputfile /scratch/syoung/base/pipeline/SRA/NA18507/maq/maq1/chr22/out.filter.snp
 
-
 =cut
-
 use strict;
 
 #### USE FINDBIN
@@ -130,13 +123,11 @@ use FindBin qw($Bin);
 use lib "$Bin/../../../lib";
 use lib "$Bin/../../../lib/external";
 use lib "$Bin/../../../lib/external/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi";
-
 BEGIN {    
 #    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/site_perl/5.8.8";
     unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-64/site_perl/5.8.8/x86_64-linux-thread-multi";
 #    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/5.8.8";   
 }
-
 
 #### INTERNAL MODULES
 use Filter::SNP;
@@ -215,7 +206,6 @@ File::Copy::copy($dbfile, $tempfile) or die "Can't copy dbfile:\n\n$dbfile\n\n t
     if defined $tempfile and not -f $tempfile;
 $dbfile = $tempfile if defined $tempfile;
 print "snpToSav.pl    Copy completed\n";
-
 my $database = "filtersnp";
 my $db = 	DBaseFactory->new( $dbtype,
 	{
