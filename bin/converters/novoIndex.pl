@@ -44,9 +44,19 @@ use Data::Dumper;
 use Getopt::Long;
 use FindBin qw($Bin);
 use File::Path;
+use FindBin::Real;
 
 #### USE LIBRARY
-use lib "$Bin/../../../lib";
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
 
 #### INTERNAL MODULES
 use Aligner::NOVOALIGN;
@@ -56,15 +66,15 @@ use Util;
 
 ##### STORE ARGUMENTS TO PRINT TO FILE LATER
 my @arguments = @ARGV;
-print "novoIndex.pl    arguments: @arguments\n";
+#print "novoIndex.pl    arguments: @arguments\n";
 
 #### FLUSH BUFFER
 $| =1;
 
 #### GET CONF 
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $novoalign = $conf->getKey("applications:aquarius-8", 'NOVOALIGN');
-print "novoIndex.pl    novoalign: $novoalign\n";
+#print "novoIndex.pl    novoalign: $novoalign\n";
 
 #### GET OPTIONS
 my $inputdir;

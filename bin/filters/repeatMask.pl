@@ -94,8 +94,18 @@ use Getopt::Long;
 use FindBin qw($Bin);
 
 #### USE LIBRARY
-use lib "$Bin/../../../lib";	
-use lib "$Bin/../../../lib/external";	
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+	
+	
 
 #### INTERNAL MODULES
 use readFilter;
@@ -111,7 +121,7 @@ my @arguments = @ARGV;
 $| =1;
 
 #### SET readFilter LOCATION
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $maq = $conf->getKey("applications:aquarius-8", 'MAQ');
 my $qstat = $conf->getKey("cluster", 'QSTAT');
 my $qsub = $conf->getKey("cluster", 'QSUB'); #### /usr/local/bin/qsub

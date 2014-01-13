@@ -42,6 +42,8 @@ class Aligner::NOVOALIGN with (Agua::Cluster::Jobs,
 	Agua::Cluster::Merge,
 	Agua::Cluster::Sort,
 	Agua::Cluster::Usage,
+	Agua::Common::Database,
+	Agua::Common::Logger,
 	Agua::Common::Util,
 	Agua::Common::SGE) {
 

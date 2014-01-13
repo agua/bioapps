@@ -197,7 +197,17 @@ use strict;
 
 #### USE LIBRARY
 use FindBin qw($Bin);
-use lib "$Bin/../../../lib";
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+
 
 #### INTERNAL MODULES
 use Timer;
@@ -210,7 +220,7 @@ use Getopt::Long;
 use Data::Dumper;
 
 #### GET CONFIGURATION PARAMETERS
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf", 'is_file');
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf", 'is_file');
 
 my $rootdir = $conf->getKey("agua", 'ROOTDIR');
 my $goat_pipeline = $conf->getKey("agua", 'GOAT_PIPELINE');

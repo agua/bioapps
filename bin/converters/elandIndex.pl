@@ -43,12 +43,16 @@ use Getopt::Long;
 use File::Path;
 
 #### USE LIBRARY
-use lib "../../lib";
-my $Bin;
-BEGIN {
-	($Bin) = $0 =~ /^(.+?)\/[^\/]+$/;
-	$Bin =~ s/\/[^\/]+\/[^\/]+\/[^\/]+$//;
-	unshift @INC, "$Bin/lib";
+use FindBin qw($Bin);
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
 }
 
 #### INTERNAL MODULES
@@ -65,9 +69,9 @@ print "elandIndex.pl    arguments: @arguments\n";
 $| =1;
 
 #### GET CONF
-my $configfile = "$Bin/conf/default.conf";
+my $configfile = "$aguadir/conf/default.conf";
 print "configfile: $configfile\n";
-#my $configfile = "$Bin/../../../conf/default.conf";
+#my $configfile = "$aguadir/conf/default.conf";
 print "elandIndex.pl    configfile: $configfile\n" if $DEBUG;
 my $conf = Conf::Agua->new(inputfile=>$configfile);
 my $casava = $conf->getKey("applications:aquarius-8", 'CASAVA');

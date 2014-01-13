@@ -120,8 +120,17 @@ use strict;
 use FindBin qw($Bin);
 
 #### USE LIBS
-use lib "$Bin/../../../lib";
-use lib "$Bin/../../../lib/external";
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+
 use lib "$Bin/../../../lib/external/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi";
 BEGIN {    
 #    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/site_perl/5.8.8";

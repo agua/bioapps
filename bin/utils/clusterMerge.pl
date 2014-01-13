@@ -51,8 +51,17 @@ use strict;
 use FindBin qw($Bin);
 
 #### USE LIBS
-use lib "$Bin/../../../lib";
-use lib "$Bin/../../../lib/external";
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+
 use lib "$Bin/../../../lib/external/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi";
 
 #### INTERNAL MODULES
@@ -68,7 +77,7 @@ my @arguments = @ARGV;
 #print "clusterMerge.pl    arguments: @arguments\n";
 
 #### SET MAQ LOCATION
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $maq = $conf->getKey("agua", 'MAQ');
 
 #### GET OPTIONS

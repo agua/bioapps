@@ -41,14 +41,26 @@ use strict;
 #### USE LIBRARY
 use Scalar::Util qw(weaken);
 use FindBin qw($Bin);
-use lib "$Bin/../../../lib/external";
-use lib "$Bin/../../../lib";
-BEGIN {
-    unshift @INC, "/nethome/syoung/base/pipeline/moose/tmp/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi";
-    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/site_perl/5.8.8";
-    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-64/site_perl/5.8.8/x86_64-linux-thread-multi";
-    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/5.8.8";    
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
 }
+
+#BEGIN {
+#    unshift @INC, "/nethome/syoung/base/pipeline/moose/tmp/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi";
+#    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/site_perl/5.8.8";
+#    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-64/site_perl/5.8.8/x86_64-linux-thread-multi";
+#    unshift @INC, "/nethome/syoung/0.5/lib/external/perl5-32/5.8.8";    
+#}
+
+print "HERE\n";
+exit;
 
 #### EXTERNAL MODULES
 use Term::ANSIColor qw(:constants);
@@ -59,7 +71,7 @@ use File::Path;
 
 
 #### INTERNAL MODULES
-use XELAND;
+use Aligner::ELAND;
 use Timer;
 use Util;
 use Conf::Agua;
@@ -72,7 +84,7 @@ unshift @arguments, $0;
 $| =1;
 
 #### SET XELAND LOCATION
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $casava = $conf->getKey("applications:aquarius-8", 'CASAVA');
 
 #### GET OPTIONS

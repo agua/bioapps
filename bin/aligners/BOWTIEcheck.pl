@@ -138,8 +138,18 @@ use File::Path;
 use File::Copy;
 
 #### USE LIBRARY
-use lib "$Bin/../../../lib";	
-use lib "$Bin/../../../lib/external";	
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+	
+	
 
 #### INTERNAL MODULES
 use BOWTIE;
@@ -156,7 +166,7 @@ unshift @arguments, $0;
 $| =1;
 
 #### GET CONF 
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $bowtie = $conf->getKey("applications:aquarius-8", 'BOWTIE');
 my $cluster = $conf->getKey("agua", 'CLUSTERTYPE');
 my $qstat = $conf->getKey("cluster", 'QSTAT');

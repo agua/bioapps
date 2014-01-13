@@ -45,7 +45,17 @@ use Getopt::Long;
 use FindBin qw($Bin);
 
 #### USE LIBRARY
-use lib "$Bin/../../../lib";
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+
 
 #### INTERNAL MODULES
 use Aligner::BOWTIE;
@@ -61,7 +71,7 @@ print "bowtieIndex.pl    arguments: @arguments\n";
 $| =1;
 
 #### GET CONF 
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $bowtie = $conf->getKey("applications:aquarius-8", 'BOWTIE');
 print "bowtieIndex.pl    bowtie: $bowtie\n";
 

@@ -1,0 +1,16 @@
+agua			ccdsGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg91/ccdsGene   
+agua			dgv	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/dgv
+agua			exoniphy	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/exoniphy
+agua			hgIkmc	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/hgIkmc
+agua			hinv70NonCoding	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/hinv70NonCoding
+agua			hinv70PseudoGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/hinv70PseudoGene
+agua			knownAlt	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/knownAlt
+agua			knownGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/knownGene
+agua			nscanGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/nscanGene
+agua			refGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/refGene
+agua			sgpGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/sgpGene
+agua			vegaGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/vegaGene
+agua			vegaPseudoGene	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/vegaPseudoGene
+agua			wgEncodeGencode2wayConsPseudoV	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/wgEncodeGencode2wayConsPseudoV4
+agua			wgEncodeGencodeAutoV4	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/wgEncodeGencodeAutoV4
+agua			wgEncodeGencodePolyaV4	static	human	hg19	<DATADIR>/jbrowse/species/human/hg19/wgEncodeGencodePolyaV4

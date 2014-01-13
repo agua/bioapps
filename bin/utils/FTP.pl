@@ -16,8 +16,8 @@ my $time = time();
         PERFORM DOWNLOADS OF INDIVIDUAL FILES OR WHOLE FTP SITES
         
         USING wget ON ALL FILES LISTED (IN text MODE) OR ALL
-		
-		LINKED FILES (IN html MODE WITH REGEX: /<A [^>]* href=(\S+)/)
+        
+        LINKED FILES (IN html MODE WITH REGEX: /<A [^>]* href=(\S+)/)
     
     INPUT
     
@@ -57,20 +57,20 @@ my $time = time();
 
 
 
-	NOTES
-	
-		EXPECTS FTP PAGES IN THE FORMAT:
-		
-			All the files and tables in this directory are freely usable for any purpose.
-		</pre>
-		<pre>
-			<a href="?C=N;O=D">Name</a>                                   <a href="?C=M;O=A">Last modified</a>\
-			<a href="?C=S;O=A">Size</a>  <a href="?C=D;O=A">Description</a><hr>      <a href="/goldenPath/hg19/">Pa\
-			rent Directory</a>                                            -
-			<a href="all_bacends.sql">all_bacends.sql</a>                        24-May-2009 11:40  2.1K
-			<a href="all_bacends.txt.gz">all_bacends.txt.gz</a>                     24-May-2009 11:40   93M
-			<a href="all_est.sql">all_est.sql</a>                            21-Feb-2010 14:49  2.3K
-			<a href="all_est.txt.gz">all_est.txt.gz</a>                         21-Feb-2010 14:49  374M
+    NOTES
+    
+        EXPECTS FTP PAGES IN THE FORMAT:
+        
+            All the files and tables in this directory are freely usable for any purpose.
+        </pre>
+        <pre>
+            <a href="?C=N;O=D">Name</a>                                   <a href="?C=M;O=A">Last modified</a>\
+            <a href="?C=S;O=A">Size</a>  <a href="?C=D;O=A">Description</a><hr>      <a href="/goldenPath/hg19/">Pa\
+            rent Directory</a>                                            -
+            <a href="all_bacends.sql">all_bacends.sql</a>                        24-May-2009 11:40  2.1K
+            <a href="all_bacends.txt.gz">all_bacends.txt.gz</a>                     24-May-2009 11:40   93M
+            <a href="all_est.sql">all_est.sql</a>                            21-Feb-2010 14:49  2.3K
+            <a href="all_est.txt.gz">all_est.txt.gz</a>                         21-Feb-2010 14:49  374M
 
 =cut
 
@@ -79,7 +79,17 @@ use strict;
 
 #### USE LIB
 use FindBin qw($Bin);
-use lib "$Bin/../../../lib";
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+
 
 #### INTERNAL MODULES
 use Timer;
@@ -100,16 +110,16 @@ my $regex;
 my $type;
 my $help;
 GetOptions (
-	'url=s' => \$url,
-	'outputdir=s' => \$outputdir,
-	'filter=s' => \$filter,
-	'regex=s' => \$regex,
-	'type=s' => \$type,
-	'help' => \$help
+    'url=s' => \$url,
+    'outputdir=s' => \$outputdir,
+    'filter=s' => \$filter,
+    'regex=s' => \$regex,
+    'type=s' => \$type,
+    'help' => \$help
 ) or die "No options specified. Try '--help'\n";
 
 #### PRINT HELP IF REQUESTED
-if ( defined $help )	{	usage();	}
+if ( defined $help )    {    usage();    }
 
 #### TYPE OF URL IS 'html' OR 'text'
 print "Type not defined (option --url)\n" and exit if not defined $type;
@@ -138,7 +148,7 @@ if ( $type eq "text" )
     my @lines = split "\n", $contents;
     foreach my $line ( @lines )
     {
-		#print "line: $line\n" if $DEBUG;
+        #print "line: $line\n" if $DEBUG;
         if ( $line =~ /(\S+)\s*$/ )
         {
             push @$files, "$url/$1";
@@ -150,36 +160,30 @@ else
     my @lines = split "\n", $contents;
     foreach my $line ( @lines )
     {
-		#print "\$line: $line\n" if $DEBUG;
-		if ( $line =~ /<a\s*[^>]*\s*href\s*=\s*('|")(\S+)('|")/ )
-		{
-			#print "\$2: $2\n" if $DEBUG;
-			push @$files, "$url/$2";
-		}
+        #print "\$line: $line\n" if $DEBUG;
+        if ( $line =~ /<a\s*[^>]*\s*href\s*=\s*('|")(\S+)('|")/ )
+        {
+            #print "\$2: $2\n" if $DEBUG;
+            push @$files, "$url/$2";
+        }
     }
 }
-#print "Files to be downloaded:\n" if $DEBUG;
-#print join "\n", @$files if $DEBUG;
+print "Files to be downloaded:\n" if $DEBUG;
+print join "\n", @$files if $DEBUG;
 
 #### CHANGE TO OUTPUT DIRECTORY
 chdir($outputdir) or die "Can't change to download directory: $outputdir\n";
 foreach my $file ( @$files )
 {
-	next if defined $filter and not $file =~ /\Q$filter\E/;
-	next if defined $regex and not $file =~ /$regex/;
-	
-	my ($filename) = $file =~ /([^\/]+)$/;
-	my $remove = "rm -fr $outputdir/$filename";
-	`$remove`;
+    next if defined $filter and not $file =~ /\Q$filter\E/;
+    next if defined $regex and not $file =~ /$regex/;
+    
+    my ($filename) = $file =~ /([^\/]+)$/;
+    my $remove = "rm -fr $outputdir/$filename";
+    `$remove`;
     my $wget = "wget $file";
     print "wget: $wget\n";
     `$wget`;
-
-	print "DOING SLEEP\n";
-	sleep(99999999999);
-	exit;
-
-
 }
 
 #### PRINT RUN TIME
@@ -224,114 +228,114 @@ sub html2text
 sub parseSymbols
 {
     return (
-    "&	&amp;",
-    "\"	&quot;",
-    "<	&lt;",
-    ">	&gt;",
-    "©	&copy;",
-    "®	&reg;",
-    "Æ	&AElig;",
-    "Á	&Aacute;",
-    "Â	&Acirc;",
-    "À	&Agrave;",
-    "Å	&Aring;",
-    "Ã	&Atilde;",
-    "Ä	&Auml;",
-    "Ç	&Ccedil;",
-    "Ð	&ETH;",
-    "É	&Eacute;",
-    "Ê	&Ecirc;",
-    "È	&Egrave;",
-    "Ë	&Euml;",
-    "Í	&Iacute;",
-    "Î	&Icirc;",
-    "Ì	&Igrave;",
-    "Ï	&Iuml;",
-    "Ñ	&Ntilde;",
-    "Ó	&Oacute;",
-    "Ô	&Ocirc;",
-    "Ò	&Ograve;",
-    "Ø	&Oslash;",
-    "Õ	&Otilde;",
-    "Ö	&Ouml;",
-    "Þ	&THORN;",
-    "Ú	&Uacute;",
-    "Û	&Ucirc;",
-    "Ù	&Ugrave;",
-    "Ü	&Uuml;",
-    "Ý	&Yacute;",
-    "á	&aacute;",
-    "â	&acirc;",
-    "æ	&aelig;",
-    "à	&agrave;",
-    "å	&aring;",
-    "ã	&atilde;",
-    "ä	&auml;",
-    "ç	&ccedil;",
-    "é	&eacute;",
-    "ê	&ecirc;",
-    "è	&egrave;",
-    "ð	&eth;",
-    "ë	&euml;",
-    "í	&iacute;",
-    "î	&icirc;",
-    "ì	&igrave;",
-    "ï	&iuml;",
-    "ñ	&ntilde;",
-    "ó	&oacute;",
-    "ô	&ocirc;",
-    "ò	&ograve;",
-    "ø	&oslash;",
-    "õ	&otilde;",
-    "ö	&ouml;",
-    "ß	&szlig;",
-    "þ	&thorn;",
-    "ú	&uacute;",
-    "û	&ucirc;",
-    "ù	&ugrave;",
-    "ü	&uuml;",
-    "ý	&yacute;",
-    "ÿ	&yuml;",
-    " 	&#160;",
-    "¡	&#161;",
-    "¢	&#162;",
-    "£	&#163;",
-    "¥	&#165;",
-    "¦	&#166;",
-    "§	&#167;",
-    "¨	&#168;",
-    "©	&#169;",
-    "ª	&#170;",
-    "«	&#171;",
-    "¬	&#172;",
-    "­	&#173;",
-    "®	&#174;",
-    "¯	&#175;",
-    "°	&#176;",
-    "±	&#177;",
-    "²	&#178;",
-    "³	&#179;",
-    "´	&#180;",
-    "µ	&#181;",
-    "¶	&#182;",
-    "·	&#183;",
-    "¸	&#184;",
-    "¹	&#185;",
-    "º	&#186;",
-    "»	&#187;",
-    "¼	&#188;",
-    "½	&#189;",
-    "¾	&#190;",
-    "¿	&#191;",
-    "×	&#215;",
-    "Þ	&#222;",
-    "÷	&#247;")
+    "&    &amp;",
+    "\"    &quot;",
+    "<    &lt;",
+    ">    &gt;",
+    "©    &copy;",
+    "®    &reg;",
+    "Æ    &AElig;",
+    "Á    &Aacute;",
+    "Â    &Acirc;",
+    "À    &Agrave;",
+    "Å    &Aring;",
+    "Ã    &Atilde;",
+    "Ä    &Auml;",
+    "Ç    &Ccedil;",
+    "Ð    &ETH;",
+    "É    &Eacute;",
+    "Ê    &Ecirc;",
+    "È    &Egrave;",
+    "Ë    &Euml;",
+    "Í    &Iacute;",
+    "Î    &Icirc;",
+    "Ì    &Igrave;",
+    "Ï    &Iuml;",
+    "Ñ    &Ntilde;",
+    "Ó    &Oacute;",
+    "Ô    &Ocirc;",
+    "Ò    &Ograve;",
+    "Ø    &Oslash;",
+    "Õ    &Otilde;",
+    "Ö    &Ouml;",
+    "Þ    &THORN;",
+    "Ú    &Uacute;",
+    "Û    &Ucirc;",
+    "Ù    &Ugrave;",
+    "Ü    &Uuml;",
+    "Ý    &Yacute;",
+    "á    &aacute;",
+    "â    &acirc;",
+    "æ    &aelig;",
+    "à    &agrave;",
+    "å    &aring;",
+    "ã    &atilde;",
+    "ä    &auml;",
+    "ç    &ccedil;",
+    "é    &eacute;",
+    "ê    &ecirc;",
+    "è    &egrave;",
+    "ð    &eth;",
+    "ë    &euml;",
+    "í    &iacute;",
+    "î    &icirc;",
+    "ì    &igrave;",
+    "ï    &iuml;",
+    "ñ    &ntilde;",
+    "ó    &oacute;",
+    "ô    &ocirc;",
+    "ò    &ograve;",
+    "ø    &oslash;",
+    "õ    &otilde;",
+    "ö    &ouml;",
+    "ß    &szlig;",
+    "þ    &thorn;",
+    "ú    &uacute;",
+    "û    &ucirc;",
+    "ù    &ugrave;",
+    "ü    &uuml;",
+    "ý    &yacute;",
+    "ÿ    &yuml;",
+    "     &#160;",
+    "¡    &#161;",
+    "¢    &#162;",
+    "£    &#163;",
+    "¥    &#165;",
+    "¦    &#166;",
+    "§    &#167;",
+    "¨    &#168;",
+    "©    &#169;",
+    "ª    &#170;",
+    "«    &#171;",
+    "¬    &#172;",
+    "­    &#173;",
+    "®    &#174;",
+    "¯    &#175;",
+    "°    &#176;",
+    "±    &#177;",
+    "²    &#178;",
+    "³    &#179;",
+    "´    &#180;",
+    "µ    &#181;",
+    "¶    &#182;",
+    "·    &#183;",
+    "¸    &#184;",
+    "¹    &#185;",
+    "º    &#186;",
+    "»    &#187;",
+    "¼    &#188;",
+    "½    &#189;",
+    "¾    &#190;",
+    "¿    &#191;",
+    "×    &#215;",
+    "Þ    &#222;",
+    "÷    &#247;")
 }
 
 
 sub usage
 {
-	print GREEN <<"EOF";
+    print GREEN <<"EOF";
 
     APPLICATION     FTP
     
@@ -380,9 +384,9 @@ sub usage
 
 EOF
 
-	print RESET;
+    print RESET;
 
-	exit;
+    exit;
 }
 
 

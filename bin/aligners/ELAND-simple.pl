@@ -171,7 +171,17 @@ use Getopt::Long;
 use FindBin qw($Bin);
 
 #### USE LIBRARY
-use lib "$Bin/../../../lib";	
+use lib "$Bin/../../lib";
+
+#### USE FULL PATH TO SCRIPT IN COMMAND SO THAT CORRECT LIBS
+#### CAN BE USED IF LINKS ARE INVOLVED
+print "Application must be called with full path (e.g., /full/path/to/file.pl)\n" and exit if $0 =~ /^\./;
+my $aguadir;
+BEGIN {	
+	($aguadir) = $0 =~ /^(.+?)\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+$/;
+	unshift @INC, "$aguadir/lib";
+}
+	
 
 #### INTERNAL MODULES
 use Sampler;
@@ -187,7 +197,7 @@ my @arguments = @ARGV;
 $| =1;
 
 #### SET ELAND LOCATION
-my $conf = Conf::Agua->new(inputfile=>"$Bin/../../../conf/default.conf");
+my $conf = Conf::Agua->new(inputfile=>"$aguadir/conf/default.conf");
 my $eland = $conf->getKey("applications:aquarius-8", 'ELAND');
 my $msub = $conf->getKey("agua", 'MSUB');
 print "eland: $eland\n";
