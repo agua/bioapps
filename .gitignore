@@ -1,0 +1,11 @@
+#### DO NOT ADD THESE FILES AND DIRECTORIES TO THE REPO
+
+#### TESTS
+t/*/bin/*/outputs/*
+!t/*/bin/*/*/.dummy
+t/*/bin/*/*/outputs/*
+!t/*/bin/*/*/*/.dummy
+t/*/bin/*/*/*/outputs/*
+!t/*/bin/*/*/*/*/.dummy
+t/*/bin/*/*/*/*/outputs/*
+!t/*/bin/*/*/*/*/*/.dummy
