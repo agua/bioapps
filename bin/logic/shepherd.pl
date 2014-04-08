@@ -1,17 +1,34 @@
 #!/usr/bin/perl -w
 
 
-=doc
+=head2
 
 APPLICATION 	shepherd
 
 PURPOSE
 
-	SHEPHERD A SERIES OF JOB COMMANDS, WITH ONLY A SPECIFIED NUMBER OF JOBS RUNNING CONCURRENTLY
+	1. Run a series of commands in the order received
+	
+	2. Run 'max' number of commands concurrently
+	
+	3. Poll running completed to determine which have complete
+	
+	4. Execute remaining commands up to 'max' number
+	
+	5. Repeat 2-4 until all commands are run
 
 HISTORY
 
-	VERSION 0.01	BASIC LOOP WITH THREADS TO MANAGE JOBS
+	v0.01	Basic loop with threads
+
+USAGE
+
+$0 [--max Int] [--sleep Int] <--commands|--commandfile String>
+
+max         :    Maximum number of commands to run concurrently
+sleep       :    Number of seconds pause between polling commands
+command     :    String of commands separated by line breaks
+commandfile :    File containing list of commands (one-per-line)
 
 =cut
 
@@ -64,6 +81,7 @@ my $object = Logic::Shepherd->new({
     logfile     =>  $logfile
 });
 
+my $commands	=	$object->commands();
 my $outputs = $object->run();
 for ( my $i = 0; $i < @$outputs; $i++ ) {
 	my $output = $$outputs[$i];
@@ -75,3 +93,7 @@ exit;
 
 ##############################################################
 
+sub usage {
+	print `perldoc $0`;
+	exit;
+}

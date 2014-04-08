@@ -1,0 +1,154 @@
+#!/usr/bin/perl -w
+
+#### DEBUG
+my $DEBUG = 0;
+#$DEBUG = 1;
+
+#### TIME
+my $time = time();
+
+=head2
+
+    APPLICATION     filegrowth
+	    
+    VERSION         0.01
+
+    PURPOSE
+  
+		1. Measure the speed at which a file grows
+		
+        2. Allow the user to adjust the time period over which growth is calculated
+
+    INPUT
+
+        1. File location
+		
+		2. Length (secs) of time period over which growth is calculated
+        
+    OUTPUT
+    
+        1. Print out file growth rate in KB/MB/TB per second/minute/hour
+		
+    USAGE
+    
+    filegrowth <--file String> [--sleep String] [--help]
+    
+		--file      :   Location of file 
+		--sleep	    :   Duration (secs) of growth calculation (default: 10)
+		--help      :   print help info
+
+    EXAMPLES
+	
+filegrowth --file /mnt/benchmark/64cpu/aligned.sam 
+
+
+
+=cut
+
+use strict;
+
+#### EXTERNAL MODULES
+use Term::ANSIColor qw(:constants);
+use Getopt::Long;
+
+#### GET OPTIONS
+my $file;
+my $sleep 		= 	10;
+my $decimals	=	2;
+my $binary;
+my $help;
+if ( not GetOptions (
+	
+	#### GENERAL
+    'file=s' 	=> \$file,
+    'sleep=i' 	=> \$sleep,
+    'decimals=i'=> \$decimals,
+    'binary' 	=> \$binary,
+    'help' 			=> \$help
+) )
+{ print "countLines.pl    Use option --help for usage instructions.\n";  exit;    };
+
+#### PRINT HELP
+if ( defined $help )	{	usage();	}
+
+#### CHECK INPUTS
+print "countLines.pl    file not defined (use --help option)\n" and exit if not defined $file;
+print "countLines.pl    Can't find file: $file\n" and exit if not -f $file;
+
+my $start	= getSize($file);
+print "start: $start\n";
+
+sleep($sleep);
+
+my $end	= getSize($file);
+print "end: $end\n";
+
+my $growth = $end - $start;
+print "growth: $growth\n";
+
+my $filesize =	readableFileSize($growth, $decimals, $binary);
+print "$filesize\n";
+
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#									SUBROUTINES
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+sub getSize {
+	my $file	=	shift;
+	
+	my $size = `ls -al $file | awk -v OFS='' '{\$1=\$2=\$3=\$4=\$6=\$7=\$8=\$9=""; print \$0}'`;
+	$size	=~ s/\s+//g;
+	
+	return $size;
+}
+
+sub readableFileSize {
+	my $bytes		=	shift;
+	my $decimals 	=	shift;
+	my $binary		=	shift;
+	$binary	=	0 if not defined $binary;
+	
+	print "readableFileSize    bytes: $bytes\n";
+	print "readableFileSize    decimals: $decimals\n";
+	print "readableFileSize    binary: $binary\n";
+	
+	
+    my $units = $binary ? 1000 : 1024;
+	return "0 b" if ! $bytes || $bytes == 0;
+	print"Downloads.readableFileSize    units: $units\n";
+
+    return $bytes + ' B' if $bytes < $units;
+    my $suffixes = $binary ? ['kB','MB','GB','TB','PB','EB','ZB','YB'] : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    my $index = -1;
+    while ( $bytes >= $units) {
+		print "readableFileSize    bytes: $bytes\n";
+        $bytes /= $units;
+        ++$index;
+    }
+	
+	print "readableFileSize    FINAL bytes: $bytes\n";
+    my $filesize = toDecimal($bytes, $decimals);
+	
+	return "$filesize $$suffixes[$index]";
+}
+
+sub toDecimal {
+	my $number		=	shift;
+	my $decimals	=	shift;
+	
+	$number = $number * (10**$decimals);
+	$number = int($number);
+	$number = $number / (10**$decimals);
+#	print "number: $number\n";	
+	
+	return $number
+}
+
+sub usage
+{
+	print GREEN;
+	print `perldoc $0`;
+	print RESET;
+	exit;
+}
+
